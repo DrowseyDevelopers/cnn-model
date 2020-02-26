@@ -1,3 +1,10 @@
+#
+.idea/
+DROWSY/
+UNFOCUSED/
+FOCUSED/
+
+#
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
