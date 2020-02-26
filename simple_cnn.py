@@ -59,8 +59,19 @@ def determine_data_paths(path_to_datasets):
             label = path_to_dataset.split(os.path.sep)[-3]
             labels.append(label)
 
+    # scale the raw pixel intensities to the range [0, 1]
+    data = np.array(data, dtype="float") / 255.0
+    labels = np.array(labels)
     print('data length: {0}'.format(len(data)))
     print('labels length: {0}'.format(len(labels)))
+
+    # partition the data into training and testing splits using 75% of
+    # the data for training and the remaining 25% for testing
+    (trainX, testX, trainY, testY) = train_test_split(data, labels, test_size=0.25, random_state=42)
+    print('Train length: {0}'.format(len(trainX)))
+    print('Test length: {0}'.format(len(testY)))
+
+
 if __name__ == '__main__':
     handle_args()
 
