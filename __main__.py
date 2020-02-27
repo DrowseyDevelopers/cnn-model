@@ -53,26 +53,40 @@ def handle_arguments():
     return args
 
 
-def get_dataset(path_to_datasets):
+def determine_data_paths(paths_to_datasets, channel, size):
     """
-    Function used to get training data and test data
-    :param path_to_datasets: list of paths to data
+    Function used to determine full paths to datasets we will be reading for training and testing
+    :param paths_to_datasets: path to root of data for DROWSY, FOCUSED, UNFOCUSED spectrograms
+    :param channel: channel we want to train a model for
+    :param size: number of experiments we want to input for test/train data
     :return:
     """
+    all_paths = []
 
-    for path_to_dataset in path_to_datasets:
-        dirs = glob.glob(path_to_datasets, recursive=True)
+    for path_to_dataset in paths_to_datasets:
+        path_with_channel = os.path.join(path_to_dataset, str(channel))
+        dirs = glob.glob(path_with_channel, recursive=True)
 
+        # TODO: need to figure out a way to get the same eeg_records dirs for each class (DROWSY, FOCUSED, UNFOCUSED)
         image_paths = sorted(list(dirs))
-        random.seed(42)
-        random.shuffle(image_paths)
+        image_paths = image_paths[:size + 1]
+
+        all_paths.extend(image_paths)
+
+    return all_paths
 
 
 def main():
     """
     Main Enterance of model
     """
-    handle_arguments()
+
+    # handle arguments
+    args = handle_arguments()
+
+    # Get all paths we want to read data from
+    data_paths = determine_data_paths(PATH_TO_DATASET, args.channel, args.size)
+
 
 if __name__ == '__main__':
     main()
