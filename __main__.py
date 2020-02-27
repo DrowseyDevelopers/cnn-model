@@ -76,6 +76,24 @@ def determine_data_paths(paths_to_datasets, channel, size):
     return all_paths
 
 
+def get_all_image_paths(all_root_paths):
+    """
+    Function used to get all spectrogram image paths from a list of root directories
+    example: './DROWSY/eeg_record/4' gets all images at path 'DROWSY/eeg_record/4/*png'
+    :param all_root_paths:
+    :return all_image_paths: complete paths to all images we are going to input for train/test data
+    """
+    all_image_paths = []
+
+    for root_path in all_root_paths:
+        png_path = os.path.join(root_path, '*.png')
+        image_paths = glob.glob(png_path, recursive=True)
+
+        all_image_paths.extend(image_paths)
+
+    return all_image_paths
+
+
 def main():
     """
     Main Enterance of model
@@ -86,7 +104,8 @@ def main():
 
     # Get all paths we want to read data from
     data_paths = determine_data_paths(PATH_TO_DATASET, args.channel, int(args.size))
-    print(data_paths)
+
+    all_image_paths = get_all_image_paths(data_paths)
 
 
 if __name__ == '__main__':
