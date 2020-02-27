@@ -21,6 +21,11 @@ import random
 import os
 
 PATH_TO_DATASET = ['./DROWSY/**', './FOCUSED/**', 'UNFOCUSED/**']
+ACTIVATION = 'relu'
+PREDICT_ACTIVATION = 'softmax'
+OPTIMIZER = 'adam'
+LOSS = 'categorical_crossentropy'
+METRICS = ['accuracy']
 
 
 def handle_arguments():
@@ -46,7 +51,7 @@ def handle_arguments():
                         help='Flag used to determine the amount of experiments to import for train/test data')
     parser.add_argument('-i', '--image-size', dest='image_size', required=True,
                         help='Flag used to determine the length and width to resize the data spectrogram images')
-    parser.add_argument('-e', '--epoch', dest='epoch', required=True,
+    parser.add_argument('-e', '--epochs', dest='epochs', required=True,
                         help='Flag used to determine the number of epochs for training')
     args = parser.parse_args()
 
@@ -133,8 +138,50 @@ def main():
 
     data_set, labels = get_train_test_data(all_image_paths, int(args.image_size))
 
-
     print('-------------------------\n[INFO] Building Model\n-------------------------')
+
+    # split training and test data
+    (trainX, testX, trainY, testY) = train_test_split(data_set, labels, test_size=0.25, random_state=42)
+
+    lb = LabelBinarizer()
+    trainY = lb.fit_transform(trainY)
+    testY = lb.transform(testY)
+
+    # building model
+    model = Sequential()
+
+    # adding layers
+    model.add(Conv2D(32, (3, 3), input_shape=(int(args.image_size), int(args.image_size), 3), activation=ACTIVATION))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(32, (3, 3), activation=ACTIVATION))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Flatten())
+
+    model.add(Dense(64, activation=ACTIVATION))
+
+    # prediction layer, using softmax because we are expecting more than two outcomes (DROWSY, FOCUSED, UNFOCUSED)
+    model.add(Dense(3, activation=PREDICT_ACTIVATION))
+    model.compile(optimizer=OPTIMIZER, loss=LOSS, metrics=METRICS)
+
+    print('-------------------------\n[INFO] Train Model\n-------------------------')
+
+    history = model.fit(trainX, trainY, epochs=int(args.epochs), validation_data=(testX, testY), batch_size=300)
+
+    print('-------------------------\n[INFO] Plot Results\n-------------------------')
+
+    plt.plot(history.history['accuracy'], label='accuracy')
+    plt.plot(history.history['val_accuracy'], label='val_accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.ylim([0.5, 1])
+    plt.legend(loc='lower right')
+
+    test_loss, test_acc = model.evaluate(testX, testY, verbose=2)
+
+    print('Test Loss: {test_loss}'.format(test_loss=test_loss))
+    print('Test Accuracy: {test_acc}'.format(test_acc=test_acc))
+    print(test_acc)
 
 
 if __name__ == '__main__':
