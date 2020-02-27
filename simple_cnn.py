@@ -9,9 +9,7 @@ from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.layers import Flatten
 from tensorflow.keras.layers import Dense
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.optimizers import SGD
-from imutils import paths
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
@@ -22,7 +20,7 @@ import os
 import glob
 from PIL import Image
 
-PATH_TO_DATASETS = ['./DROWSY/**/4', './FOCUSED/**/4', 'UNFOCUSED/**/4']
+PATH_TO_DATASETS = ['./DROWSY/**/5', './FOCUSED/**/5', 'UNFOCUSED/**/5']
 
 def handle_args():
     # construct the argument parser and parse the arguments
@@ -105,7 +103,7 @@ def determine_data_paths(path_to_datasets):
     classifier.compile(optimizer='adam', loss='categorical_crossentropy', metrics=["accuracy"])
 
     # train
-    history = classifier.fit(trainX, trainY, epochs=75, validation_data=(testX, testY), batch_size=32)
+    history = classifier.fit(trainX, trainY, epochs=10, validation_data=(testX, testY), batch_size=32)
 
     plt.plot(history.history['accuracy'], label='accuracy')
     plt.plot(history.history['val_accuracy'], label='val_accuracy')
