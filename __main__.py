@@ -23,6 +23,32 @@ import os
 PATH_TO_DATASET = ['./DROWSY/**', './FOCUSED/**', 'UNFOCUSED/**']
 
 
+def handle_arguments():
+    """
+    Function used to parse script arguments
+    :return args: commandline arguments for script
+    """
+    """
+    parser.add_argument("-d", "--dataset", required=True,
+            help="path to input dataset of images")
+    parser.add_argument("-m", "--model", required=True,
+            help="path to output trained model")
+    parser.add_argument("-l", "--label-bin", required=True,
+            help="path to output label binarizer")
+    parser.add_argument("-p", "--plot", required=True,
+            help="path to output accuracy/loss plot")
+    """
+
+    parser = argparse.ArgumentParser(description='Train a model to classify spectrograms')
+    parser.add_argument('-c', '--channel', dest='channel', required=True, choices=[4, 5, 8, 9, 10, 11, 16],
+                        help='Flag used to determine what channel we want to create a model for')
+    parser.add_argument('-s', '--set', dest='size', required=True,
+                        help='Flag used to determine the amount of experiments to import for train/test data')
+    args = parser.parse_args()
+
+    return args
+
+
 def get_dataset(path_to_datasets):
     """
     Function used to get training data and test data
@@ -42,8 +68,7 @@ def main():
     """
     Main Enterance of model
     """
-    classifier = Sequential()
-
+    handle_arguments()
 
 if __name__ == '__main__':
     main()
