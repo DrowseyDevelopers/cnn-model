@@ -93,6 +93,28 @@ def get_all_image_paths(all_root_paths):
 
     return all_image_paths
 
+def get_train_test_data(images_path_list, image_size):
+    """
+    Function used to get all train and test images and label data
+    :param images_path_list: list of all images we want to read
+    :param image_size: image resize to save computation time
+    :return data, labels: data with their labels (e.g., DROWSY, FOCUSED, UNFOCUSED)
+    """
+    data = []
+    labels = []
+
+    for image_path in images_path_list:
+        image_src = np.asarray(Image.open(image_path).resize((image_size, image_size)).convert('RGB'))
+        data.append(image_src)
+
+        label = image_path.split(os.path.sep)[-4]
+        labels.append(label)
+
+    data = np.array(data, dtype='float') / 255.0
+    labels = np.array(labels)
+
+    return data, labels
+
 
 def main():
     """
@@ -106,6 +128,8 @@ def main():
     data_paths = determine_data_paths(PATH_TO_DATASET, args.channel, int(args.size))
 
     all_image_paths = get_all_image_paths(data_paths)
+
+    data_set, labels = get_train_test_data(all_image_paths, int(args.image_size))
 
 
 if __name__ == '__main__':
