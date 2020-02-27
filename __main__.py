@@ -40,7 +40,7 @@ def handle_arguments():
     """
 
     parser = argparse.ArgumentParser(description='Train a model to classify spectrograms')
-    parser.add_argument('-c', '--channel', dest='channel', required=True, choices=[4, 5, 8, 9, 10, 11, 16],
+    parser.add_argument('-c', '--channel', dest='channel', type=int, required=True, choices=[4, 5, 8, 9, 10, 11, 16],
                         help='Flag used to determine what channel we want to create a model for')
     parser.add_argument('-s', '--set', dest='size', required=True,
                         help='Flag used to determine the amount of experiments to import for train/test data')
@@ -69,7 +69,7 @@ def determine_data_paths(paths_to_datasets, channel, size):
 
         # TODO: need to figure out a way to get the same eeg_records dirs for each class (DROWSY, FOCUSED, UNFOCUSED)
         image_paths = sorted(list(dirs))
-        image_paths = image_paths[:size + 1]
+        image_paths = image_paths[:size]
 
         all_paths.extend(image_paths)
 
@@ -85,7 +85,8 @@ def main():
     args = handle_arguments()
 
     # Get all paths we want to read data from
-    data_paths = determine_data_paths(PATH_TO_DATASET, args.channel, args.size)
+    data_paths = determine_data_paths(PATH_TO_DATASET, args.channel, int(args.size))
+    print(data_paths)
 
 
 if __name__ == '__main__':
