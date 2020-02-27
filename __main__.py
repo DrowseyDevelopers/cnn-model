@@ -124,12 +124,17 @@ def main():
     # handle arguments
     args = handle_arguments()
 
+    print('-------------------------\n[INFO] Preprocessing Data\n-------------------------')
+
     # Get all paths we want to read data from
     data_paths = determine_data_paths(PATH_TO_DATASET, args.channel, int(args.size))
 
     all_image_paths = get_all_image_paths(data_paths)
 
     data_set, labels = get_train_test_data(all_image_paths, int(args.image_size))
+
+
+    print('-------------------------\n[INFO] Building Model\n-------------------------')
 
 
 if __name__ == '__main__':
