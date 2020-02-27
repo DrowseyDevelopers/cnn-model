@@ -5,7 +5,11 @@ from sklearn.preprocessing import LabelBinarizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D
+from tensorflow.keras.layers import MaxPooling2D
+from tensorflow.keras.layers import Flatten
 from tensorflow.keras.layers import Dense
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.optimizers import SGD
 from imutils import paths
 import matplotlib.pyplot as plt
@@ -16,6 +20,7 @@ import pickle
 import cv2
 import os
 import glob
+from PIL import Image
 
 PATH_TO_DATASETS = ['./DROWSY/**/4', './FOCUSED/**/4', 'UNFOCUSED/**/4']
 
@@ -33,6 +38,7 @@ def handle_args():
     args = vars(ap.parse_args())
 
     return args
+
 
 def determine_data_paths(path_to_datasets):
     data = []
@@ -53,8 +59,8 @@ def determine_data_paths(path_to_datasets):
             images.extend(curr_images)
 
         for png in images:
-            image_src = cv2.imread(png)
-            image_src = cv2.resize(image_src, (32, 32)).flatten()
+            image_src = np.asarray(Image.open(png).resize((32, 32)).convert('RGB'))
+            #image_src = cv2.resize(image_src, (32, 32)).flatten()
             data.append(image_src)
             label = path_to_dataset.split(os.path.sep)[-3]
             labels.append(label)
@@ -71,6 +77,46 @@ def determine_data_paths(path_to_datasets):
     print('Train length: {0}'.format(len(trainX)))
     print('Test length: {0}'.format(len(testY)))
 
+    lb = LabelBinarizer()
+    trainY = lb.fit_transform(trainY)
+    testY = lb.transform(testY)
+
+    classifier = Sequential()
+    classifier.add(Conv2D(32, (3, 3), input_shape=(32, 32, 3), activation='relu'))
+    classifier.add(MaxPooling2D(pool_size=(2, 2)))
+    classifier.add(Conv2D(64, (3, 3), activation='relu'))
+    classifier.add(MaxPooling2D(pool_size=(2, 2)))
+    classifier.add(Flatten())
+    classifier.add(Dense(64, activation='relu'))
+
+    # using softmax becuase we are expecting more than two outcomes
+    classifier.add(Dense(3, activation='softmax'))
+
+    classifier.summary()
+
+    # initialize our initial learning rate and # of epochs to train for
+    INIT_LR = 0.01
+    EPOCHS = 75
+    # compile the model using SGD as our optimizer and categorical
+    # cross-entropy loss (you'll want to use binary_crossentropy
+    # for 2-class classification)
+    print("[INFO] training network...")
+    opt = SGD(lr=INIT_LR)
+    classifier.compile(optimizer='adam', loss='categorical_crossentropy', metrics=["accuracy"])
+
+    # train
+    history = classifier.fit(trainX, trainY, epochs=75, validation_data=(testX, testY), batch_size=32)
+
+    plt.plot(history.history['accuracy'], label='accuracy')
+    plt.plot(history.history['val_accuracy'], label='val_accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.ylim([0.5, 1])
+    plt.legend(loc='lower right')
+
+    test_loss, test_acc = classifier.evaluate(testX, testY, verbose=2)
+
+    print(test_acc)
 
 if __name__ == '__main__':
     handle_args()
