@@ -152,13 +152,15 @@ def main():
 
     # adding layers
     model.add(Conv2D(32, (3, 3), input_shape=(int(args.image_size), int(args.image_size), 3), activation=ACTIVATION))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Conv2D(32, (3, 3), activation=ACTIVATION))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-
+    
+    #model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(32, (3, 3), activation=ACTIVATION))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Flatten())
 
-    model.add(Dense(64, activation=ACTIVATION))
+    model.add(Dense(32, activation=ACTIVATION))
 
     # prediction layer, using softmax because we are expecting more than two outcomes (DROWSY, FOCUSED, UNFOCUSED)
     model.add(Dense(3, activation=PREDICT_ACTIVATION))
