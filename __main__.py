@@ -10,6 +10,7 @@ from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.layers import Flatten
 from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dropout
 from tensorflow.keras.optimizers import SGD
 
 import matplotlib.pyplot as plt
@@ -146,6 +147,12 @@ def main():
     lb = LabelBinarizer()
     trainY = lb.fit_transform(trainY)
     testY = lb.transform(testY)
+    #trainX = lb.fit_transform(trainX)
+    #testX = lb.transform(testX)
+    print(trainY[:])
+    print("from here starts YYY")
+    print(testY[:])
+
 
     # building model
     model = Sequential()
@@ -153,20 +160,28 @@ def main():
     # adding layers
     model.add(Conv2D(32, (3, 3), input_shape=(int(args.image_size), int(args.image_size), 3), activation=ACTIVATION))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(32, (3, 3), activation=ACTIVATION))
+    model.add(Conv2D(64, (3, 3), activation=ACTIVATION))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(128, (3, 3), activation=ACTIVATION))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())
 
-    model.add(Dense(64, activation=ACTIVATION))
+    model.add(Dropout(0.4))
+    model.add(Dense(128, activation=ACTIVATION))
+    
+    #model.add(Dropout(0.4))
+    #model.add(Dense(64, activation=ACTIVATION))
+    
+    #model.add(Dense(250, activation=ACTIVATION))
 
     # prediction layer, using softmax because we are expecting more than two outcomes (DROWSY, FOCUSED, UNFOCUSED)
-    model.add(Dense(3, activation=PREDICT_ACTIVATION))
+    model.add(Dense(3, activation='softmax'))
     model.compile(optimizer=OPTIMIZER, loss=LOSS, metrics=METRICS)
 
     print('-------------------------\n[INFO] Train Model\n-------------------------')
 
-    history = model.fit(trainX, trainY, epochs=int(args.epochs), validation_data=(testX, testY), batch_size=300)
+    history = model.fit(trainX, trainY, epochs=int(args.epochs), validation_data=(testX, testY), batch_size=128)
 
     print('-------------------------\n[INFO] Plot Results\n-------------------------')
 
